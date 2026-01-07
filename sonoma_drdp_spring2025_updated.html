@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonoma DRDP Early Learning Assessment Data Spring 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f9fafb;
+            padding: 24px;
+            color: #374151;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 32px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+        .card.total { border-left-color: #6b7280; }
+        .card.lea { border-left-color: #2563eb; }
+        .card.community { border-left-color: #16a34a; }
+        .card.mll { border-left-color: #9333ea; }
+        .card-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.3;
+        }
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .card.total .card-value { color: #1f2937; }
+        .card.lea .card-value { color: #2563eb; }
+        .card.community .card-value { color: #16a34a; }
+        .card.mll .card-value { color: #9333ea; }
+        .card-pct {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+        }
+        .chart-wrapper-small {
+            position: relative;
+            height: 280px;
+        }
+        .findings {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        .findings-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .finding {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .finding-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 6px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .finding-dot.blue { background-color: #2563eb; }
+        .finding-dot.green { background-color: #16a34a; }
+        .finding-dot.gray { background-color: #6b7280; }
+        .finding-dot.purple { background-color: #7c3aed; }
+        .finding-text {
+            color: #374151;
+            line-height: 1.5;
+        }
+        .finding-text strong {
+            font-weight: 600;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 24px;
+        }
+        .section-divider {
+            border-top: 2px solid #e5e7eb;
+            margin: 40px 0;
+            padding-top: 32px;
+        }
+        .section-header {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .section-subtitle {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        .readiness-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .readiness-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid;
+        }
+        .readiness-card.high { border-top-color: #16a34a; }
+        .readiness-card.medium { border-top-color: #eab308; }
+        .readiness-card.low { border-top-color: #dc2626; }
+        .readiness-domain {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .readiness-pct {
+            font-size: 36px;
+            font-weight: 700;
+        }
+        .readiness-card.high .readiness-pct { color: #16a34a; }
+        .readiness-card.medium .readiness-pct { color: #ca8a04; }
+        .readiness-card.low .readiness-pct { color: #dc2626; }
+        .readiness-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        @media (max-width: 800px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .readiness-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sonoma DRDP Early Learning Assessment Data Spring 2025</h1>
+        <p class="subtitle">Age Distribution by Program Type (Ages 0-5)</p>
+
+        <div class="cards">
+            <div class="card total">
+                <p class="card-label">Total Children</p>
+                <p class="card-value">2,412</p>
+            </div>
+            <div class="card lea">
+                <p class="card-label">LEA/IEP, IFSP Children</p>
+                <p class="card-value">1,125</p>
+                <p class="card-pct">46.6% of total</p>
+            </div>
+            <div class="card lea">
+                <p class="card-label">LEA/IEP, IFSP Programs</p>
+                <p class="card-value">33</p>
+            </div>
+            <div class="card community">
+                <p class="card-label">Community Program Children</p>
+                <p class="card-value">1,287</p>
+                <p class="card-pct">53.4% of total</p>
+            </div>
+            <div class="card community">
+                <p class="card-label">Community Programs</p>
+                <p class="card-value">15</p>
+            </div>
+        </div>
+
+        <div class="cards" style="grid-template-columns: repeat(2, 1fr); max-width: 500px;">
+            <div class="card mll">
+                <p class="card-label">Multilingual Learners (MLL)</p>
+                <p class="card-value">1,224</p>
+                <p class="card-pct">50.7% of total</p>
+            </div>
+            <div class="card mll">
+                <p class="card-label">MLLs English Proficient</p>
+                <p class="card-value">58.7%</p>
+                <p class="card-pct">719 of 1,224 MLLs</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Counts of DRDP by Age and Program Type</h2>
+            <div class="chart-wrapper">
+                <canvas id="stackedChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Percentage LEA/IEP, IFSP vs Community by Age</h2>
+            <div class="chart-wrapper-small">
+                <canvas id="percentChart"></canvas>
+            </div>
+        </div>
+
+        <div class="findings">
+            <h2 class="findings-title">Key Findings - Age Distribution</h2>
+            <div class="finding">
+                <div class="finding-dot blue"></div>
+                <p class="finding-text"><strong>Age 0 (61% LEA/IEP, IFSP):</strong> High LEA/IEP, IFSP representation reflects early intervention (Part C) capturing identified delays early, while community infant care is underrepresented.</p>
+            </div>
+            <div class="finding">
+                <div class="finding-dot green"></div>
+                <p class="finding-text"><strong>Age 2 (89% Community):</strong> The gap between Part C ending and Part B beginning at age 3, with community toddler programs dominating.</p>
+            </div>
+            <div class="finding">
+                <div class="finding-dot gray"></div>
+                <p class="finding-text"><strong>Ages 3-5 (~50/50):</strong> Reflects expansion of both preschool options and Part B services after age 3.</p>
+            </div>
+            <div class="finding">
+                <div class="finding-dot blue"></div>
+                <p class="finding-text"><strong>Age 5 (58% LEA/IEP, IFSP):</strong> Children still receiving services who haven't yet transitioned to kindergarten.</p>
+            </div>
+        </div>
+
+        <!-- NEW SECTION: Kindergarten Readiness -->
+        <div class="section-divider">
+            <h2 class="section-header">Kindergarten Readiness: 5-Year-Olds in Community Programs</h2>
+            <p class="section-subtitle">Percentage of children rated "Ready" by HRTL domain (n=204)</p>
+        </div>
+
+        <div class="readiness-cards">
+            <div class="readiness-card high">
+                <p class="readiness-domain">Physical Development</p>
+                <p class="readiness-pct">98%</p>
+                <p class="readiness-label">Ready</p>
+            </div>
+            <div class="readiness-card high">
+                <p class="readiness-domain">Language</p>
+                <p class="readiness-pct">89%</p>
+                <p class="readiness-label">Ready</p>
+            </div>
+            <div class="readiness-card high">
+                <p class="readiness-domain">Math/Cognition</p>
+                <p class="readiness-pct">83%</p>
+                <p class="readiness-label">Ready</p>
+            </div>
+            <div class="readiness-card medium">
+                <p class="readiness-domain">Social-Emotional</p>
+                <p class="readiness-pct">72%</p>
+                <p class="readiness-label">Ready</p>
+            </div>
+            <div class="readiness-card medium">
+                <p class="readiness-domain">Self-Regulation</p>
+                <p class="readiness-pct">69%</p>
+                <p class="readiness-label">Ready</p>
+            </div>
+            <div class="readiness-card low">
+                <p class="readiness-domain">Literacy</p>
+                <p class="readiness-pct">57%</p>
+                <p class="readiness-label">Ready</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Domain Readiness: 5-Year-Olds in Community Programs</h2>
+            <div class="chart-wrapper-small">
+                <canvas id="readinessChart"></canvas>
+            </div>
+        </div>
+
+        <div class="findings">
+            <h2 class="findings-title">Key Findings - Kindergarten Readiness</h2>
+            <div class="finding">
+                <div class="finding-dot green"></div>
+                <p class="finding-text"><strong>Physical Development (98%):</strong> Nearly all children demonstrate kindergarten-ready motor skills and physical health indicators.</p>
+            </div>
+            <div class="finding">
+                <div class="finding-dot green"></div>
+                <p class="finding-text"><strong>Language & Cognition (89%, 83%):</strong> Strong readiness in receptive/expressive language and mathematical thinking.</p>
+            </div>
+            <div class="finding">
+                <div class="finding-dot purple"></div>
+                <p class="finding-text"><strong>Social-Emotional & Self-Regulation (72%, 69%):</strong> Areas with room for growth; these foundational skills support classroom success.</p>
+            </div>
+            <div class="finding">
+                <div class="finding-dot gray"></div>
+                <p class="finding-text"><strong>Literacy (57%):</strong> Lowest readiness domain; reflects the developmental nature of emergent literacy skills in preschoolers.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Data Source: Combined Sonoma County DRDP Assessment Data</p>
+            <p>N = 2,412 children assessed | Readiness data: n=204 five-year-olds in community programs</p>
+        </div>
+    </div>
+
+    <script>
+        const ages = ['Age 0', 'Age 1', 'Age 2', 'Age 3', 'Age 4', 'Age 5'];
+        const leaData = [27, 24, 15, 363, 419, 277];
+        const communityData = [17, 53, 122, 369, 522, 204];
+        const totals = [44, 77, 137, 732, 941, 481];
+        const pctLEA = [61.4, 31.2, 10.9, 49.6, 44.5, 57.6];
+        const pctCommunity = [38.6, 68.8, 89.1, 50.4, 55.5, 42.4];
+
+        // Stacked Bar Chart
+        const ctx1 = document.getElementById('stackedChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ages,
+                datasets: [
+                    {
+                        label: 'LEA/IEP, IFSP',
+                        data: leaData,
+                        backgroundColor: '#2563eb',
+                        borderRadius: 0
+                    },
+                    {
+                        label: 'Community Programs',
+                        data: communityData,
+                        backgroundColor: '#16a34a',
+                        borderRadius: { topLeft: 4, topRight: 4 }
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterBody: function(context) {
+                                const idx = context[0].dataIndex;
+                                return `\nTotal: ${totals[idx]}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: { display: true, text: 'Age (Years)' }
+                    },
+                    y: {
+                        stacked: true,
+                        title: { display: true, text: 'Number of Children' },
+                        beginAtZero: true
+                    }
+                }
+            },
+            plugins: [{
+                id: 'datalabels',
+                afterDatasetsDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((bar, index) => {
+                            const value = dataset.data[index];
+                            if (value > 25) {
+                                ctx.save();
+                                ctx.fillStyle = 'white';
+                                ctx.font = 'bold 12px sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                const y = bar.y + (bar.height / 2);
+                                ctx.fillText(value, bar.x, y);
+                                ctx.restore();
+                            }
+                        });
+                    });
+                    // Add totals on top
+                    const meta = chart.getDatasetMeta(1);
+                    meta.data.forEach((bar, index) => {
+                        ctx.save();
+                        ctx.fillStyle = '#6b7280';
+                        ctx.font = '11px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`n=${totals[index]}`, bar.x, bar.y - 8);
+                        ctx.restore();
+                    });
+                }
+            }]
+        });
+
+        // Horizontal Percentage Chart
+        const ctx2 = document.getElementById('percentChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ages,
+                datasets: [
+                    {
+                        label: '% LEA/IEP, IFSP',
+                        data: pctLEA,
+                        backgroundColor: '#2563eb'
+                    },
+                    {
+                        label: '% Community',
+                        data: pctCommunity,
+                        backgroundColor: '#16a34a'
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        max: 100,
+                        title: { display: true, text: 'Percentage' },
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        title: { display: true, text: 'Age' }
+                    }
+                }
+            },
+            plugins: [{
+                id: 'pctLabels',
+                afterDatasetsDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((bar, index) => {
+                            const value = dataset.data[index];
+                            if (bar.width > 35) {
+                                ctx.save();
+                                ctx.fillStyle = 'white';
+                                ctx.font = 'bold 11px sans-serif';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                const x = bar.x - (bar.width / 2);
+                                ctx.fillText(value + '%', x, bar.y);
+                                ctx.restore();
+                            }
+                        });
+                    });
+                }
+            }]
+        });
+
+        // NEW: Readiness Bar Chart
+        const ctx3 = document.getElementById('readinessChart').getContext('2d');
+        const domains = ['Physical Dev', 'Language', 'Cognition', 'Social-Emotional', 'Self-Regulation', 'Literacy'];
+        const readinessData = [98, 89, 83, 72, 69, 57];
+        const barColors = readinessData.map(v => v >= 80 ? '#16a34a' : v >= 65 ? '#eab308' : '#dc2626');
+        
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: domains,
+                datasets: [{
+                    label: '% Ready',
+                    data: readinessData,
+                    backgroundColor: barColors,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw}% Ready`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Domain' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: 'Percent Ready' },
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        }
+                    }
+                }
+            },
+            plugins: [{
+                id: 'readinessLabels',
+                afterDatasetsDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const meta = chart.getDatasetMeta(0);
+                    meta.data.forEach((bar, index) => {
+                        const value = readinessData[index];
+                        ctx.save();
+                        ctx.fillStyle = '#1f2937';
+                        ctx.font = 'bold 14px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(value + '%', bar.x, bar.y - 8);
+                        ctx.restore();
+                    });
+                }
+            }]
+        });
+    </script>
+</body>
+</html>
